@@ -1,8 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import { NavLink } from "react-router";
 
-export default function Login() {
+export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const registerFormData = new FormData();
@@ -19,19 +18,17 @@ export default function Login() {
           registerFormData.append("password", password);
           axios({
             method: "post",
-            url: "http://localhost:8000/login",
+            url: "http://localhost:8000/register",
             data: registerFormData,
             headers: { "Content-Type": "multipart/form-data" },
           })
             .then((response) => {
               console.log(response);
-              // save JWT token into localStorage
-              localStorage.setItem("token", response.data.access_token);
-              alert("Login successfully!");
+              alert("Registered successfully!");
             })
             .catch((error) => {
               console.error(error);
-              alert("Login unsuccessfully!");
+              alert("Registered unsuccessfully!");
             });
         }}
         method="post"
@@ -69,9 +66,6 @@ export default function Login() {
             className="btn btn-primary w-100"
           />
         </div>
-        <NavLink to="/register" className=" link">
-          Not registered yet? Register now
-        </NavLink>
       </form>
     </div>
   );
