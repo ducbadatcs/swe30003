@@ -12,8 +12,7 @@ class User(SQLModel, table=True):
     
     
 class CartItem(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-
+    id: int = Field(primary_key=True) # dummy primary key
     username: str = Field(foreign_key="user.username")
     product_id: int = Field(foreign_key="product.id")
 

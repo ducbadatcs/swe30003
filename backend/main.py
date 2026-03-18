@@ -61,16 +61,34 @@ def get_product_list():
             detail=traceback.format_exc()
         )
         
-@app.delete("/delete-product")
-def delete_product_with_id(id: int):
+
+@app.get("/products/{id}")
+def get_product_by_id(id: int) -> Product | None:
     try:
         with Session(engine) as session:
             statement = select(Product).where(Product.id == id)
             results = session.exec(statement)
-            product = results.one()
-            session.delete(product)
-            session.commit()
-        return {"status_code": status.HTTP_201_CREATED, "detail": "Product deleted successfully"}
+            product = results.one_or_none()
+            if product is None:
+                raise HTTPException(status_code=404, detail="Product not found")
+            return product
+    except HTTPException:
+        raise
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=traceback.format_exc()
+        )
+        
+@app.delete("/delete-product")
+def delete_product_with_id(id: int):
+    try:
+        with Session(engine) as session:
+            product = get_product_by_id(id)
+            if product is not None:
+                session.delete(product)
+                session.commit()
+        return {"status_code": status.HTTP_200_OK, "detail": "Product deleted successfully"}
     except:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
