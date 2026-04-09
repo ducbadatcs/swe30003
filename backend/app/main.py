@@ -1,3 +1,6 @@
+from idna.codec import search_function
+from sqlalchemy.exc import StatementError
+from importlib.resources import path
 from fastapi.openapi.utils import status_code_ranges
 from traceback import print_exc
 from typing import Any
@@ -7,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, SQLModel, select, or_
 
 from .db import engine, get_session
-from .schemas import Branch, Customer, MenuItem, Staff, BranchInventory
+from .schemas import Branch, Customer, MenuItem, Staff, BranchInventory, OrderItem
 
 app = FastAPI(title="Restaurant Operations API", version="2.0.0")
 app.add_middleware(
@@ -20,19 +23,21 @@ app.add_middleware(
 
 @app.post(path="/register-branch")
 def register_branch(
-    name: str, address: str,
+    id: str, name: str, address: str,
     session: Session = Depends(get_session)
 ):
-    branch = Branch(name=name, address=address)
+    branch = Branch(id=id, name=name, address=address)
     try:
         session.add(branch)
+        session.commit()
+        return {"status_code": 200, "detail": "Branch registered successfully"}
     except:
         raise HTTPException(status_code=500, detail="Internal Server Error")
         print_exc()
-    return {"status_code": 200, "detail": "Branch registered successfully"}
+    
 
-@app.get(path="/find-branch")
-def find_branch(
+@app.get(path="/find-branches")
+def find_branches(
     name: str, address: str,
     session: Session = Depends(get_session)
 ):
@@ -43,10 +48,27 @@ def find_branch(
                 name.lower() in Branch.name.lower(), 
                 address.lower() in Branch.address.lower()))
         results = session.exec(statement)
+        return results
     except:
         raise HTTPException(status_code=500, detail="Internal Server Error")
         print_exc()
-    return results
+    
+
+@app.delete(path="/unregister-branch")
+def unregister_branch(
+    id: str, 
+    session: Session = Depends(get_session)
+):
+    try:
+        statement = select(Branch).where(Branch.id == id)
+        result = session.exec(statement).one_or_none()
+        if result is None:
+            raise HTTPException(status_code = 404, detail = "Brand ID not found")
+        session.delete(result)
+        return {"status_code": 200, "detail": "Brand Unregistering complete"}
+    except:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        print_exc()
 
 # customers
 @app.post(path="/register-customer")
@@ -59,10 +81,27 @@ def register_customer(
     try:
         session.add(customer)
         session.commit()
+        return {"status_code": 200, "detail": "Customer registered successfully"}
     except:
         raise HTTPException(status_code=500, detail="Internal Server Error")
         print_exc()
-    return {"status_code": 200, "detail": "Customer registered successfully"}
+    
+
+@app.get("/get-customer-by-email")
+def get_customer_by_email(
+    email: str,
+    session: Session = Depends(get_session)
+):
+    try:
+        statement = select(Customer).where(Customer.email.lower() == email.lower())
+        result = session.exec(statement).one_or_none()
+        if result is None:
+            raise HTTPException(status_code=404, detail="Customer Not Found")
+        
+        return {"status_code": 200, "detail": "Customer found"}
+    except:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        print_exc()
 
 # menu items
 
@@ -135,12 +174,69 @@ def stock_menu_item(
             if result is None: 
                 raise AssertionError("Result should have been available")
             result.quantity += quantity
+            session.add(result)
+            session.commit()
+            session.refresh(result)
+            return {"status_code": 200, "detail": "Item stocked to branch"}
     except:
         raise HTTPException(status_code=500, detail="Internal Server Error")
         print_exc()
-    return {"status_code": 200, "detail": "Item stocked"}
     
+    
+@app.delete("/delete-menu-item")
+def delete_menu_item(
+    item_id: str,
+    session: Session = Depends(get_session)
+):
+    try:
+        item = get_item_by_id(item_id)
+        if item is None:
+            raise HTTPException(status_code = 404, detail = "Menu Item with ID not found")
+        session.delete(item)
+        session.commit()
+        return {"status_code": 200, "detail": "Item deleted successfully"}
+    except:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        print_exc()
 
-@app.post("/order/{customer_id}/{branch_id}")
-def make_order(customer: Customer, branch: Branch, items: list[MenuItem]):
-    pass
+# order
+@app.post("/order/{customer_email}/{branch_id}/")
+def make_order(
+    customer_email: str, branch_id: str, items: dict[str, int]):
+    try:
+        total = 0
+        for item_id, quantity in items.items():
+            item = get_item_by_id(item_id)
+            if item is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Item with id {item_id} not found in menu"
+                )
+                
+            count = count_item_in_branch(item_id, branch_id)
+            if count is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Item {item_id} is not stocked in branch {branch_id}",
+                )
+
+            if count < quantity:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Not enough stock for item {item_id}",
+                )
+                
+            price = item.price
+            order = OrderItem(customer_email=customer_email, branch_id=branch_id)
+            total += price * quantity
+            
+        return {
+            "status_code": 200,
+            "total_price": total,
+            "detail": "Order completed"
+        }
+    except:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        print_exc()
+        
+    

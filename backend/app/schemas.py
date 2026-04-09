@@ -1,68 +1,73 @@
 from __future__ import annotations
-from markdown_it.rules_block import table
-from sqlmodel import SQLModel
+import uuid
+
+from enum import Enum
 
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel
+from sqlmodel import Field, SQLModel
+from uuid import UUID, uuid4
 
 class Branch(SQLModel, table=True):
-    id: str = Field(min_length=1, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(min_length=1)
     address: str = Field(min_length=1)
 
 
 class Customer(SQLModel, table=True):
-    email: str = Field(min_length=1, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    email: str = Field(min_length=1)
     full_name: str = Field(min_length=1)
     password: str = Field(min_length=1)
     
 
+class StaffRoleEnum(str, Enum):
+    STAFF = "staff"
+    KITCHEN = "kitchen"
+    CASHIER = "cashier"
+    MANAGER = "manager"
 
 class Staff(SQLModel, table=True):
-    id: str = Field(min_length=1, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     username: str = Field(min_length=1)
     password: str = Field(min_length=1)
-    role: Literal["staff", "kitchen", "cashier", "manager"] = Field(default="staff", min_length=1)
+    role: StaffRoleEnum = Field(default=StaffRoleEnum.STAFF, min_length=1)
     location: str = Field(foreign_key="branch.id")
 
 
 class MenuItem(SQLModel, table=True):
-    id: str = Field(min_length=1, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(min_length=1)
     price: float = Field(ge=0)
 
 
 class BranchInventory(SQLModel, table=True):
-    branch_id: str = Field(min_length=1, foreign_key="branch.id")
-    item_id: str = Field(min_length=1, foreign_key="menuitem.id")
+    branch_id: str = Field(min_length=1, foreign_key="branch.id", primary_key=True)
+    item_id: str = Field(min_length=1, foreign_key="menuitem.id", primary_key=True)
     quantity: int = Field(ge=0)
 
+class OrderStatusEnum(str, Enum):
+    PENDING = "pending",
+    CONFIRMED = "confirmed",
+    PAID = "paid",
+    PREPARING = "preparing",
+    READY = "ready",
+    OUT_FOR_DELIVERY = "out_for_delivery",
+    DELIVERED = "delivered",
+    CANCELLED = "cancelled",
+    
 
-class InventoryUpdate(BaseModel):
-    stock_level: int = Field(ge=0)
-    reorder_point: int | None = Field(default=None, ge=0)
-
-
-class OrderItem(BaseModel):
-    email: str = Field(foreign_key="customer.email")
-    branch: str = Field(foreign_key="branch.id")
+class OrderItem(SQLModel, table=True):
+    order_item_id: str = Field(primary_key=True)
+    customer_email: str = Field(foreign_key="customer.email")
+    branch_id: str = Field(foreign_key="branch.id")
     item: str = Field(foreign_key="menuitem.id")
+    status: OrderStatusEnum = Field(default = OrderStatusEnum.PENDING, min_length=1)
 
 
-class OrderStatusUpdate(BaseModel):
-    status: Literal[
-        "pending",
-        "confirmed",
-        "preparing",
-        "ready",
-        "paid",
-        "out_for_delivery",
-        "delivered",
-        "cancelled",
-    ]
+
 
 
 class DeliveryCreate(BaseModel):
