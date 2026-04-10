@@ -1,3 +1,4 @@
+from sqlalchemy.sql.functions import user
 from sqlmodel import Session, select, or_
 from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from traceback import print_exc
@@ -48,6 +49,18 @@ def get_staff_by_id(
 ) -> Staff | None:
     try:
         statement = select(Staff).where(Staff.id == id)
+        result = session.exec(statement).one_or_none()
+        return result
+    except:
+        print_exc()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+def get_staff_by_username(
+    username: int,
+    session: Session = Depends(get_session)
+):
+    try:
+        statement = select(Staff).where(Staff.username == username)
         result = session.exec(statement).one_or_none()
         return result
     except:

@@ -1,0 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+	font-family: "Inter", system-ui, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+	color: #f3efe7;
+	/* background: */
+	/* radial-gradient(circle at top left, rgba(194, 107, 51, 0.34), transparent 34%),
+		radial-gradient(circle at top right, rgba(76, 97, 68, 0.35), transparent 30%),
+		linear-gradient(160deg, #0f1110 0%, #171815 44%, #101312 100%); */
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+	min-height: 100vh;
+	/* background:
+		radial-gradient(circle at top left, rgba(194, 107, 51, 0.34), transparent 34%),
+		radial-gradient(circle at top right, rgba(76, 97, 68, 0.35), transparent 30%),
+		linear-gradient(160deg, #0f1110 0%, #171815 44%, #101312 100%);
+	color: #f3efe7; */
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+}
+
+:root {
+	font-weight: 400;
+	font-synthesis: none;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+}
