@@ -17,12 +17,13 @@ export function LoginForm() {
     form.append("username", username);
     form.append("password", password);
     axios
-      .post("http://localhost:8000/customer/verify-customer", form)
+      .post("http://localhost:8000/customer/token", form)
       .then((response) => {
         console.log(response);
       })
       .catch((error) => {
         console.error(error);
+        alert("Error: Invalid customer username or password");
       });
   };
   return (

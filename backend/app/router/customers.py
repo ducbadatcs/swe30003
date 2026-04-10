@@ -1,3 +1,4 @@
+from typing import Annotated
 from argon2.exceptions import VerifyMismatchError
 
 
@@ -11,7 +12,7 @@ from argon2 import PasswordHasher
 from ..db import get_session
 from ..schemas import Customer
 
-from ..auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from ..auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_customer_from_token
 from datetime import timedelta
 from pydantic import BaseModel
 
@@ -127,3 +128,10 @@ def login_customer(
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     return Token(access_token=access_token, token_type="bearer")
+
+@customer_router.get("/current-customer")
+async def get_current_customer(
+    customer: Annotated[Customer, Depends(get_customer_from_token)]
+):
+    return customer
+    
