@@ -5,13 +5,13 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
 export function LoginForm() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: Event) => {
     event.preventDefault();
     const form = new FormData();
     form.append("username", username);
@@ -20,6 +20,12 @@ export function LoginForm() {
       .post("http://localhost:8000/customer/token", form)
       .then((response) => {
         console.log(response);
+        return response.data;
+      })
+      .then((data) => {
+        const access_token: string = data.access_token;
+        localStorage.setItem("access_token", access_token);
+        alert("Login Success!");
       })
       .catch((error) => {
         console.error(error);

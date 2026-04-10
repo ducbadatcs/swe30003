@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
 from .db import get_session
-from .schemas import Customer
+from .schemas import Customer, Staff
 
 
 SECRET_KEY = "292f0bacbed56f35a7704ee2be369469bc2abf270e0d13042678ce5f67710fae"
@@ -59,3 +59,31 @@ async def get_customer_from_token(
     return customer
 
 
+async def get_staff_from_token(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    session: Session = Depends(get_session),
+) -> Staff:
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except InvalidTokenError:
+        raise credentials_exception
+    
+    try:
+        statement = select(Staff).where(Staff.username == username)
+        staff = session.exec(statement).one_or_none()
+        if staff is None:
+            raise credentials_exception
+    except:
+        print_exc()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+    return staff

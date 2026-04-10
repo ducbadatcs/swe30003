@@ -12,6 +12,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button, Divider, Paper, Stack } from "@mui/material";
 
+import { getCurrentUsername } from "../utils";
+
 type MenuItem = {
   id: number;
   name: string;
@@ -21,6 +23,7 @@ type MenuItem = {
 type Cart = Record<number, number>;
 
 export default function Shop() {
+  const [username, setUsername] = useState<string>("");
   const [shop, setShop] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<Cart>({});
 
@@ -56,6 +59,14 @@ export default function Shop() {
       .catch((err) => console.error(err));
   }, []);
 
+  useEffect(() => {
+    async function setName() {
+      const name = await getCurrentUsername();
+      setUsername(name);
+    }
+    setName();
+  });
+
   const cartTotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
@@ -66,7 +77,8 @@ export default function Shop() {
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Shop</Typography>
         <Typography color="text.secondary" sx={{ mt: 1 }}>
-          Browse the menu and add items to your cart.
+          Hello {username}, what would you like to order? Browse the menu and
+          add items to your cart.
         </Typography>
       </Paper>
 
@@ -140,28 +152,36 @@ export default function Shop() {
                 Your cart is empty. Add something from the menu to get started.
               </Typography>
             ) : (
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Product</TableCell>
-                      <TableCell>Qty</TableCell>
-                      <TableCell>Price</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {cartItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.name}</TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell>
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </TableCell>
+              <Box>
+                {" "}
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Product</TableCell>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell>Price Per Item</TableCell>
+                        <TableCell>Total Item Price</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {cartItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.name}</TableCell>
+                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>${item.price.toFixed(2)}</TableCell>
+                          <TableCell>
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <Button fullWidth variant="contained">
+                  Checkout
+                </Button>
+              </Box>
             )}
 
             <Divider />
