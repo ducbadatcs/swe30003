@@ -12,7 +12,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+
 import { red } from "@mui/material/colors";
 
 const theme = createTheme({
@@ -26,22 +26,61 @@ const theme = createTheme({
   },
 });
 
+import { useEffect, useState } from "react";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import { getCurrentUsername } from "./utils";
+
 export default function NavBar() {
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const syncAuth = async () => {
+      setUsername(await getCurrentUsername());
+      console.log(username);
+    };
+
+    syncAuth();
+
+    const onAuthChanged = () => {
+      syncAuth();
+    };
+
+    window.addEventListener("auth-changed", onAuthChanged);
+    return () => window.removeEventListener("auth-changed", onAuthChanged);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    setUsername("");
+    window.dispatchEvent(new Event("auth-changed"));
+  };
+
   return (
     <AppBar position="static" color="primary">
       <Toolbar>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Restaurant App
         </Typography>
+
         <Button component={NavLink} to="/" color="inherit">
           Shop
         </Button>
-        <Button component={NavLink} to="/login" color="inherit">
-          Login / Register
-        </Button>
-        <Button component={NavLink} to="/checkout" color="inherit">
-          Checkout
-        </Button>
+
+        {username ? (
+          <>
+            <Typography sx={{ mx: 2 }}>Hello, {username}</Typography>
+            <Button onClick={handleLogout} color="inherit">
+              Logout
+            </Button>
+          </>
+        ) : (
+          <Button component={NavLink} to="/login" color="inherit">
+            Login / Register
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );

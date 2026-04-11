@@ -5,7 +5,8 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCurrentUsername } from "../utils";
 
 export function CustomerLoginForm() {
   const [username, setUsername] = useState<string>("");
@@ -13,6 +14,11 @@ export function CustomerLoginForm() {
 
   const handleSubmit = (event: Event) => {
     event.preventDefault();
+    if (localStorage.getItem("role")) {
+      console.log(localStorage.getItem("role"));
+      alert("Already logged in, please logged out first!");
+      return;
+    }
     const form = new FormData();
     form.append("username", username);
     form.append("password", password);
@@ -25,7 +31,11 @@ export function CustomerLoginForm() {
       .then((data) => {
         const access_token: string = data.access_token;
         localStorage.setItem("access_token", access_token);
+        localStorage.setItem("username", username);
+        localStorage.setItem("role", "customer");
         alert("Login Success!");
+        window.dispatchEvent(new Event("auth-changed"));
+        window.location.href = "/";
       })
       .catch((error) => {
         console.error(error);
@@ -70,8 +80,8 @@ export function RegisterForm() {
       alert("Passwords don't match!");
       return;
     }
-    console.log(username);
-    console.log(password);
+    // console.log(username);
+    // console.log(password);
     const formData = new FormData();
     formData.append("username", username);
     formData.append("password", password);
@@ -79,11 +89,11 @@ export function RegisterForm() {
       .post("http://localhost:8000/customer/register-customer", formData)
       .then((response) => {
         console.log(response);
-        alert("Registering success!");
+        alert("Registered successfully! Please log in.");
       })
       .catch((error) => {
         console.error(error);
-        alert("Register unsuccessfully; see server logs");
+        alert("Registered unsuccessfully; see server logs");
       });
   };
 
