@@ -7,7 +7,7 @@ import Stack from "@mui/material/Stack";
 import axios from "axios";
 import { useState } from "react";
 
-export function LoginForm() {
+export function CustomerLoginForm() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -35,11 +35,11 @@ export function LoginForm() {
   return (
     <Paper sx={{ p: 3 }}>
       <Stack spacing={2} component="form" onSubmit={handleSubmit}>
-        <Typography variant="h5">Login</Typography>
+        <Typography variant="h5">Customer Login</Typography>
         <TextField
           label="Username"
           name="username"
-          id="login-form-username"
+          id="customer-login-form-username"
           onChange={(e) => setUsername(e.target.value)}
           fullWidth
         />
@@ -47,7 +47,7 @@ export function LoginForm() {
           label="Password"
           name="password"
           type="password"
-          id="login-form-password"
+          id="customer-login-form-password"
           onChange={(e) => setPassword(e.target.value)}
           fullWidth
         />
@@ -79,9 +79,11 @@ export function RegisterForm() {
       .post("http://localhost:8000/customer/register-customer", formData)
       .then((response) => {
         console.log(response);
+        alert("Registering success!");
       })
       .catch((error) => {
         console.error(error);
+        alert("Register unsuccessfully; see server logs");
       });
   };
 
@@ -93,6 +95,7 @@ export function RegisterForm() {
           label="Username"
           name="username"
           id="register-form-username"
+          required
           onChange={(e) => setUsername(e.target.value)}
           fullWidth
         />
@@ -101,6 +104,7 @@ export function RegisterForm() {
           name="password"
           type="password"
           id="register-form-password"
+          required
           onChange={(e) => setPassword(e.target.value)}
           fullWidth
         />
@@ -109,9 +113,58 @@ export function RegisterForm() {
           name="repeat-password"
           type="password"
           id="register-form-repeat-password"
+          required
           onChange={(e) => {
             setRepeatPassword(e.target.value);
           }}
+          fullWidth
+        />
+        <Button type="submit" variant="contained">
+          Submit
+        </Button>
+      </Stack>
+    </Paper>
+  );
+}
+
+export function StaffLoginForm() {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    axios
+      .post("http://localhost:8000/staffs/token", formData)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  return (
+    <Paper sx={{ p: 3 }}>
+      <Stack spacing={2} component="form" onSubmit={handleSubmit}>
+        <Typography variant="h5">Staff Login</Typography>
+        <TextField
+          label="Username"
+          name="username"
+          id="staff-login-form-username"
+          required
+          onChange={(e) => setUsername(e.target.value)}
+          fullWidth
+        />
+        <TextField
+          label="Password"
+          name="password"
+          type="password"
+          id="staff-login-form-password"
+          required
+          onChange={(e) => setPassword(e.target.value)}
           fullWidth
         />
         <Button type="submit" variant="contained">
@@ -134,13 +187,11 @@ export default function Login() {
       <Paper sx={{ p: 3 }}>
         <Stack spacing={2}>
           <Typography variant="h4">Account</Typography>
-          <Typography color="text.secondary">
-            Login if you already have an account, or register a new one.
-          </Typography>
+          <StaffLoginForm />
         </Stack>
       </Paper>
       <Stack spacing={3}>
-        <LoginForm />
+        <CustomerLoginForm />
         <RegisterForm />
       </Stack>
     </Box>

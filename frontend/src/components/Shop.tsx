@@ -12,7 +12,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button, Divider, Paper, Stack } from "@mui/material";
 
-import { getCurrentUsername } from "../utils";
+import { getCurrentUsername, isLoggedIn } from "../utils";
 
 type MenuItem = {
   id: number;
@@ -76,10 +76,16 @@ export default function Shop() {
     <Stack spacing={3}>
       <Paper sx={{ p: 3 }}>
         <Typography variant="h4">Shop</Typography>
-        <Typography color="text.secondary" sx={{ mt: 1 }}>
-          Hello {username}, what would you like to order? Browse the menu and
-          add items to your cart.
-        </Typography>
+        {username != "" ? (
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            Hello {username}, what would you like to order? Browse the menu and
+            add items to your cart.
+          </Typography>
+        ) : (
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            Please log in to order
+          </Typography>
+        )}
       </Paper>
 
       <Box
@@ -178,9 +184,15 @@ export default function Shop() {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                <Button fullWidth variant="contained">
-                  Checkout
-                </Button>
+                {username != "" ? (
+                  <Button fullWidth variant="contained">
+                    Checkout
+                  </Button>
+                ) : (
+                  <Typography>
+                    You need to login first before checkout.
+                  </Typography>
+                )}
               </Box>
             )}
 

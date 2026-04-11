@@ -12,7 +12,7 @@ from argon2 import PasswordHasher
 from ..db import get_session
 from ..schemas import Customer
 
-from ..auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_customer_from_token
+from ..auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_customer_from_token, Token
 from datetime import timedelta
 from pydantic import BaseModel
 
@@ -104,9 +104,6 @@ def verify_customer(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 # menu items
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
 
 @customer_router.post("/token", response_model=Token)
 def login_customer(

@@ -6,7 +6,6 @@ Full-stack restaurant operations dashboard built with FastAPI, React, and Vite.
 
 - Backend: Python + FastAPI + SQLModel
 - Frontend: React + Vite + TypeScript
-- Data: SQLite-backed relational schema for branches, customers, staff, menu items, inventory, orders, payments, promotions, loyalty, and delivery
 
 ## Run Locally
 
@@ -25,10 +24,10 @@ cd backend
 uv venv .
 source .venv/bin/activate
 cd app
-uv run fastapi dev
+fastapi dev
 ```
 
-The API runs at `http://127.0.0.1:8000`, and can be accessed at `http://127.0.0.1:8000/docs`.
+The API runs at `http://localhost:8000`, and a Swagger Interface to test them can be accessed at `http://localhost:8000/docs`.
 
 ### Frontend
 
@@ -37,3 +36,5 @@ cd frontend
 pnpm install
 pnpm run dev
 ```
+
+The frontend interface can then be accessed at `http://localhost:5173/`

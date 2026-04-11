@@ -37,7 +37,7 @@ export default function NavBar() {
           Shop
         </Button>
         <Button component={NavLink} to="/login" color="inherit">
-          Login
+          Login / Register
         </Button>
         <Button component={NavLink} to="/checkout" color="inherit">
           Checkout

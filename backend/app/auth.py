@@ -87,3 +87,7 @@ async def get_staff_from_token(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
     return staff
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
