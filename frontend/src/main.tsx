@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, NavLink } from "react-router";
 import Shop from "./components/Shop";
 import Login from "./components/Login";
 import Checkout from "./components/Checkout";
+import Admin from "./components/Admin";
 
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -27,17 +28,17 @@ const theme = createTheme({
 });
 
 import { useEffect, useState } from "react";
-import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { getCurrentUsername } from "./utils";
+import { getCurrentRole, getCurrentUsername } from "./utils";
 
 export default function NavBar() {
   const [username, setUsername] = useState("");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     const syncAuth = async () => {
       setUsername(await getCurrentUsername());
-      console.log(username);
+      setRole(await getCurrentRole());
     };
 
     syncAuth();
@@ -55,8 +56,13 @@ export default function NavBar() {
     localStorage.removeItem("username");
     localStorage.removeItem("role");
     setUsername("");
+    setRole("");
     window.dispatchEvent(new Event("auth-changed"));
   };
+
+  const canAccessAdmin = ["staff", "kitchen", "cashier", "manager"].includes(
+    role,
+  );
 
   return (
     <AppBar position="static" color="primary">
@@ -68,6 +74,12 @@ export default function NavBar() {
         <Button component={NavLink} to="/" color="inherit">
           Shop
         </Button>
+
+        {canAccessAdmin ? (
+          <Button component={NavLink} to="/admin" color="inherit">
+            Admin
+          </Button>
+        ) : null}
 
         {username ? (
           <>
@@ -97,6 +109,7 @@ function App() {
             <Route path="/" element={<Shop />} />
             <Route path="/login" element={<Login />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </Box>
       </BrowserRouter>

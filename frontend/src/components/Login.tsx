@@ -5,14 +5,13 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { getCurrentUsername } from "../utils";
+import { type FormEvent, useState } from "react";
 
 export function CustomerLoginForm() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleSubmit = (event: Event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (localStorage.getItem("role")) {
       console.log(localStorage.getItem("role"));
@@ -74,7 +73,7 @@ export function RegisterForm() {
   const [password, setPassword] = useState<string>("");
   const [repeatPassword, setRepeatPassword] = useState<string>("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (password != repeatPassword) {
       alert("Passwords don't match!");
@@ -141,7 +140,7 @@ export function StaffLoginForm() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("username", username);
@@ -150,6 +149,17 @@ export function StaffLoginForm() {
       .post("http://localhost:8000/staffs/token", formData)
       .then((response) => {
         console.log(response);
+        alert("Login success!");
+        return response.data;
+      })
+      .then((data) => {
+        const access_token: string = data.access_token;
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("username", username);
+        localStorage.setItem("role", "staff");
+        alert("Login Success!");
+        window.dispatchEvent(new Event("auth-changed"));
+        window.location.href = "/";
       })
       .catch((error) => {
         console.error(error);

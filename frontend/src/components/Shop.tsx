@@ -12,7 +12,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Button, Divider, Paper, Stack } from "@mui/material";
 
-import { getCurrentUsername, isLoggedIn } from "../utils";
+import { getCurrentUsername } from "../utils";
 
 type MenuItem = {
   id: number;
@@ -185,7 +185,13 @@ export default function Shop() {
                   </Table>
                 </TableContainer>
                 {username != "" ? (
-                  <Button fullWidth variant="contained">
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={() => {
+                      alert("Payment success!");
+                    }}
+                  >
                     Checkout
                   </Button>
                 ) : (
