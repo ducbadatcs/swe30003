@@ -58,6 +58,7 @@ export default function NavBar() {
     setUsername("");
     setRole("");
     window.dispatchEvent(new Event("auth-changed"));
+    window.location.reload();
   };
 
   const canAccessAdmin = ["staff", "kitchen", "cashier", "manager"].includes(

@@ -149,7 +149,6 @@ export function StaffLoginForm() {
       .post("http://localhost:8000/staffs/token", formData)
       .then((response) => {
         console.log(response);
-        alert("Login success!");
         return response.data;
       })
       .then((data) => {

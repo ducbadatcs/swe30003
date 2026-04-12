@@ -76,3 +76,8 @@ export async function getCurrentRole(): Promise<string> {
 export async function isLoggedIn(): Promise<boolean> {
   return (await getCurrentUsername()) !== "";
 }
+
+export function reloadPage() {
+  window.dispatchEvent(new Event("auth-changed"));
+  window.location.href = "/";
+}

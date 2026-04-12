@@ -1,4 +1,6 @@
-import { type ReactNode, useEffect, useState } from "react";
+import sys
+
+content = """import { type ReactNode, useEffect, useState } from "react";
 
 import axios from "axios";
 import Alert from "@mui/material/Alert";
@@ -23,15 +25,48 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import { getCurrentRole, getCurrentUsername } from "../utils";
-import type {
-  Branch,
-  Staff,
-  BranchInventory,
-  SelectFieldProps,
-  MenuItemType,
-  StaffRole,
-  Notice,
-} from "../schemas.ts";
+
+// --- Types ---
+
+type Branch = {
+  id: number;
+  name: string;
+  address: string;
+};
+
+type StaffRole = "staff" | "kitchen" | "cashier" | "manager";
+
+type Staff = {
+  id: number;
+  username: string;
+  role: StaffRole;
+  branch_id: number;
+};
+
+type MenuItemType = {
+  id: number;
+  name: string;
+  price: number;
+};
+
+type BranchInventory = {
+  branch_id: number;
+  item_id: number;
+  quantity: number;
+};
+
+type Notice = {
+  severity: "success" | "error";
+  message: string;
+};
+
+type SelectFieldProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  disabled?: boolean;
+};
 
 // --- Shared UI Components ---
 
@@ -769,3 +804,8 @@ export default function Admin() {
     </Stack>
   );
 }
+"""
+
+with open('/home/duc/Documents/SWE30003-Project/frontend/src/components/Admin.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+
