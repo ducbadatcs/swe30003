@@ -5,12 +5,13 @@ from importlib.resources import path
 from typing import Any, cast
 
 from sqlmodel import Session, select, or_
-from fastapi import Depends, FastAPI, HTTPException, APIRouter
+from fastapi import Depends, FastAPI, HTTPException, APIRouter, Form
 from traceback import print_exc
 from ..db import get_session
 from ..schemas import MenuItem, Branch, BranchInventory
 from ..auth import get_staff_from_token
 from ..schemas import Staff
+from .staffs import list_staffs_in_branch
 
 menu_router = APIRouter(prefix="/menu")
 
@@ -46,7 +47,7 @@ def get_item_by_id(
 @menu_router.get("/list-menu-items")    
 def list_menu_items(
 	session: Session = Depends(get_session)
-):
+) -> list[MenuItem]:
     try:
         statement = select(MenuItem)
         results = session.exec(statement)
@@ -123,7 +124,9 @@ def count_item_in_branch(
 
 @menu_router.patch(path="/restock-menu-item")
 def stock_menu_item(
-    item_id: int, branch_id: int, quantity: int,
+    item_id: int = Form(...), 
+    branch_id: int = Form(...),
+    quantity: int = Form(...),
     session: Session = Depends(get_session),
     staff: Staff = Depends(get_staff_from_token),
 ):
@@ -159,7 +162,27 @@ def stock_menu_item(
         print_exc()
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
-
+@menu_router.patch("/stock-test")
+def stock_test(
+    branch_id: int,
+    session: Session = Depends(get_session)
+):
+    # random member of branch
+    
+    try:
+        staff = list_staffs_in_branch(branch_id, session)
+        if len(staff) == 0:
+            raise HTTPException(status_code=400, detail="Branch has no staff!")
+        
+        items = list_menu_items(session)
+        for item in items: 
+            stock_menu_item(item.id, branch_id, 100, session, staff[0])
+        return {"status_code": 200, "detail": "Stock test complete@"}
+    except:
+        print_exc()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+    
     
 @menu_router.delete("/delete-menu-item")
 def delete_menu_item(

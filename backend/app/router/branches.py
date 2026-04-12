@@ -8,7 +8,7 @@ branch_router = APIRouter(prefix="/branches")
 
 @branch_router.post(path="/register-branch")
 def register_branch(
-    name: str, address: str,
+    name: str = Form(...), address: str = Form(...),
     session: Session = Depends(get_session)
 ):
     try:

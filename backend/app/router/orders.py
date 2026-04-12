@@ -45,7 +45,7 @@ def make_order(
             # update new quantity
             inventory_item = get_item_in_inventory(item_id, branch_id, session)
             assert inventory_item is not None, "Item shouldn't be None"
-            inventory_item.quantity -= count
+            inventory_item.quantity -= quantity
             session.add(inventory_item)
             session.commit()
             session.refresh(inventory_item), session

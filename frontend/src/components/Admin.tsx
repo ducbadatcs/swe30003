@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect, useState } from "react";
 
-import axios from "axios";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -32,6 +31,17 @@ import type {
   StaffRole,
   Notice,
 } from "../schemas.ts";
+
+import {
+  fetchBranches,
+  fetchCurrentStaff,
+  fetchInventory,
+  fetchMenuItems,
+  fetchStaffs,
+  registerBranch,
+  registerStaff,
+  restockMenuItem,
+} from "../helpers.ts";
 
 // --- Shared UI Components ---
 
@@ -85,103 +95,6 @@ function SelectField({
       </Select>
     </FormControl>
   );
-}
-
-// --- API Helpers ---
-
-async function fetchBranches(): Promise<Branch[]> {
-  const response = await axios.get<Branch[]>(
-    "http://127.0.0.1:8000/branches/list-branches",
-  );
-  return response.data;
-}
-
-async function fetchStaffs(): Promise<Staff[]> {
-  const response = await axios.get<Staff[]>(
-    "http://127.0.0.1:8000/staffs/list-staffs",
-  );
-  return response.data;
-}
-
-async function fetchMenuItems(): Promise<MenuItemType[]> {
-  const response = await axios.get<MenuItemType[]>(
-    "http://127.0.0.1:8000/menu/list-menu-items",
-  );
-  return response.data;
-}
-
-async function fetchInventory(branchId: number): Promise<BranchInventory[]> {
-  const response = await axios.get<BranchInventory[]>(
-    "http://127.0.0.1:8000/menu/list-item-in-inventory",
-    {
-      params: {
-        branch_id: branchId,
-      },
-    },
-  );
-  return response.data;
-}
-
-async function fetchCurrentStaff(): Promise<{ branch_id: number }> {
-  const token = localStorage.getItem("access_token");
-  if (!token) {
-    throw new Error("Missing access token");
-  }
-
-  const response = await axios.get<{ branch_id: number }>(
-    "http://127.0.0.1:8000/staffs/current-staff",
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-
-  return response.data;
-}
-
-async function registerBranch(name: string, address: string) {
-  await axios.post("http://127.0.0.1:8000/branches/register-branch", null, {
-    params: { name, address },
-  });
-}
-
-async function registerStaff(input: {
-  username: string;
-  password: string;
-  role: StaffRole;
-  branchId: number;
-}) {
-  const formData = new FormData();
-  formData.append("username", input.username);
-  formData.append("password", input.password);
-
-  await axios.post("http://127.0.0.1:8000/staffs/register-staff", formData, {
-    params: {
-      role: input.role,
-      branch_id: input.branchId,
-    },
-  });
-}
-
-async function createMenuItem(name: string, price: number) {
-  await axios.post("http://127.0.0.1:8000/menu/create-menu-item", null, {
-    params: { name, price },
-  });
-}
-
-async function restockMenuItem(input: {
-  branchId: number;
-  itemId: number;
-  quantity: number;
-}) {
-  await axios.patch("http://127.0.0.1:8000/menu/restock-menu-item", null, {
-    params: {
-      branch_id: input.branchId,
-      item_id: input.itemId,
-      quantity: input.quantity,
-    },
-  });
 }
 
 // --- Section Components ---
@@ -544,11 +457,11 @@ function InventorySection({
       return;
     }
     try {
-      await restockMenuItem({
-        branchId: Number(inventoryBranchId),
-        itemId: Number(inventoryItemId),
-        quantity: Number(inventoryQuantity),
-      });
+      await restockMenuItem(
+        Number(inventoryBranchId),
+        Number(inventoryItemId),
+        Number(inventoryQuantity),
+      );
       setInventoryQuantity("");
       setInventory(await fetchInventory(Number(inventoryBranchId)));
       setNotice({ severity: "success", message: "Inventory updated." });

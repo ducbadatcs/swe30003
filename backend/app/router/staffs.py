@@ -51,6 +51,19 @@ def list_staffs(
     except:
         print_exc()
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+@staff_router.get("/list-staffs-in-branch")
+def list_staffs_in_branch(
+    branch_id: int,
+    session: Session = Depends(get_session)
+) -> list[Staff]:
+    try:
+        statement = select(Staff).where(Staff.branch_id == branch_id)
+        results = session.exec(statement).all()
+        return list(results)
+    except:
+        print_exc()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
         
 @staff_router.get("/get-staff-by-id")
 def get_staff_by_id(
@@ -108,6 +121,8 @@ def verify_staff(
     except:
         print_exc()
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
     
 @staff_router.post("/token", response_model=Token)
 def login_staff(
